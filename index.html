@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Class9b3</title>
+<style>
+:root{--bg:#f6f5f1;--fg:#1d1d1b;--card:#fff;--ac:#2a6f5c;--mut:#777;--bd:#e0ddd5;color-scheme:light}
+@media(prefers-color-scheme:dark){:root{--bg:#171716;--fg:#ecebe6;--card:#232321;--ac:#5cc4a6;--mut:#999;--bd:#38382f;color-scheme:dark}}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--bg);color:var(--fg);font:16px/1.6 system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;padding:12px 12px 80px}
+h2{font-size:18px;margin:14px 0 8px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px;margin:8px 0}
+input,select,textarea,button{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--bd);border-radius:10px;padding:8px 10px;width:100%;margin:4px 0}
+button{background:var(--ac);color:#fff;border:0;cursor:pointer;width:auto;padding:8px 14px}
+button.g{background:transparent;color:var(--ac);border:1px solid var(--ac)}
+button.d{background:#b3382c}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.row>input{flex:1;min-width:90px}
+.chip{background:var(--card);color:var(--fg);border:1px solid var(--bd);padding:6px 12px;margin:2px}
+.chip.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+.m{color:var(--mut);font-size:13px}.tag{font-size:12px;background:var(--bd);border-radius:6px;padding:1px 7px}
+nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:var(--card);border-top:1px solid var(--bd)}
+nav button{flex:1;background:none;color:var(--mut);border-radius:0;margin:0;padding:12px 4px}
+nav button.on{color:var(--ac);font-weight:700}
+section{display:none}section.on{display:block}
+#msgs{max-height:55vh;overflow-y:auto}.msg{padding:6px 0;border-bottom:1px solid var(--bd)}
+#err{color:#b3382c;font-size:14px}
+</style></head><body>
+<div id="login" class="card"><h2>Class9b3</h2><p>سجّل الدخول بحساب Google لفتح الصفحة.</p><button id="in">تسجيل الدخول بـ Google</button><div id="err"></div></div>
+<div id="app" hidden>
+<div class="row"><span id="top" class="m"></span><button class="g" id="out">خروج</button><button id="claim" hidden>اجعلني المشرف</button></div>
+<div id="err2"></div>
+
+<section id="les" class="on">
+<h2>قريباً</h2><div id="up"></div>
+<input id="sq" placeholder="ابحث في كل الدروس">
+<h2>المواد</h2><div id="chips"></div>
+<div id="subAdmin" class="card" hidden><b>إدارة المواد (للمشرف)</b>
+<div class="row"><input id="sn" placeholder="اسم المادة"><input id="sc" type="number" placeholder="المعامل" style="max-width:90px"><button id="sadd">إضافة</button></div></div>
+<div class="card"><b id="addT"></b>
+<select id="ty"><option value="lesson">درس</option><option value="hw">واجب</option><option value="exam">فرض / امتحان</option></select>
+<input id="ti" placeholder="العنوان"><input id="dt" type="date">
+<textarea id="tx" rows="5" placeholder="نص الدرس أو التفاصيل"></textarea>
+<button id="add">حفظ</button> <span id="addM" class="m"></span></div>
+<div id="sugBox" hidden><h2>اقتراحات بانتظار المراجعة</h2><div id="sug"></div></div>
+<h2>المحتوى</h2><div id="list"></div>
+</section>
+
+<section id="gr">
+<h2>أعدادي (خاصة بي فقط)</h2>
+<div class="m">اكتب الأعداد مفصولة بفاصلة، مثال: 12, 14.5, 9</div>
+<div id="grl"></div>
+<div class="card"><b id="avg"></b></div>
+<div class="card"><b>ماذا لو؟</b>
+<div class="row"><input id="tg" type="number" placeholder="المعدل المطلوب"><select id="ts"></select></div>
+<button id="tgb">احسب</button><div id="tgr"></div></div>
+</section>
+
+<section id="cht">
+<h2>دردشة القسم</h2>
+<div id="msgs" class="card"></div>
+<div class="row"><input id="ci" placeholder="اكتب رسالة"><button id="cs">إرسال</button></div>
+</section>
+
+<nav><button data-t="les" class="on">الدروس</button><button data-t="gr">المعدل</button><button data-t="cht">الدردشة</button></nav>
+</div>
+
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+import {getAuth,GoogleAuthProvider,signInWithPopup,signOut,onAuthStateChanged} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+import {getFirestore,doc,collection,onSnapshot,setDoc,addDoc,deleteDoc,query,orderBy,limit} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+const app=initializeApp({apiKey:"AIzaSyBNs9AmOZ-206UmlOrbh-eqTKAO5e0-IE4",authDomain:"class9b3-9efa0.firebaseapp.com",projectId:"class9b3-9efa0",storageBucket:"class9b3-9efa0.firebasestorage.app",messagingSenderId:"644056561140",appId:"1:644056561140:web:002514ce43678b229c35a1"});
+const auth=getAuth(app),db=getFirestore(app);
+const $=s=>document.querySelector(s);
+const esc=t=>String(t??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const TY={lesson:"درس",hw:"واجب",exam:"فرض"};
+let me,user,admin=false,subs=[],les=[],sug=[],chat=[],G={},cur=null,started=false;
+const fail=e=>{$("#err2").innerHTML='<div class="card" id="err">خطأ: '+esc(e.code||e.message)+'</div>'};
+
+$("#in").onclick=()=>signInWithPopup(auth,new GoogleAuthProvider()).catch(e=>$("#err").textContent=e.code||e.message);
+$("#out").onclick=()=>signOut(auth);
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll("nav button,section").forEach(e=>e.classList.remove("on"));
+  b.classList.add("on");$("#"+b.dataset.t).classList.add("on");
+});
+
+const sName=id=>(subs.find(s=>s.id===id)||{}).name||"—";
+function chips(){
+  if(!cur&&subs[0])cur=subs[0].id;
+  $("#chips").innerHTML=subs.length?subs.map(s=>`<button class="chip ${s.id===cur?"on":""}" data-s="${s.id}">${esc(s.name)}</button>`).join(""):'<div class="m">لم تُضف مواد بعد.</div>';
+  $("#chips").querySelectorAll("button").forEach(b=>b.onclick=()=>{cur=b.dataset.s;chips();lists()});
+  $("#ts").innerHTML=subs.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join("");
+}
+const item=(x,btns)=>`<div class="card"><span class="tag">${TY[x.type]||""}</span> <b>${esc(x.title)}</b> <span class="m">${esc(sName(x.subject))} ${esc(x.date||"")}</span><div style="white-space:pre-wrap">${esc(x.text)}</div>${btns}</div>`;
+function lists(){
+  const qv=$("#sq").value.trim();
+  const L=(qv?les.filter(x=>(x.title+" "+x.text).includes(qv)):les.filter(x=>x.subject===cur)).sort((a,b)=>(a.date||"9").localeCompare(b.date||"9"));
+  $("#list").innerHTML=L.map(x=>item(x,admin?`<button class="d" data-del="${x.id}">حذف</button>`:"")).join("")||'<div class="m">لا يوجد محتوى.</div>';
+  $("#list").querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>confirm("حذف؟")&&deleteDoc(doc(db,"lessons",b.dataset.del)).catch(fail));
+  const today=new Date().toISOString().slice(0,10);
+  const U=les.filter(x=>x.type!=="lesson"&&x.date>=today).sort((a,b)=>a.date.localeCompare(b.date)).slice(0,5);
+  $("#up").innerHTML=U.map(x=>`<div class="card"><span class="tag">${TY[x.type]}</span> <b>${esc(x.title)}</b> <span class="m">${esc(sName(x.subject))} ${esc(x.date)}</span></div>`).join("")||'<div class="m">لا مواعيد قادمة.</div>';
+  $("#sugBox").hidden=!sug.length;
+  $("#sug").innerHTML=sug.map(x=>item(x,admin?`<button data-ok="${x.id}">قبول</button> <button class="d" data-no="${x.id}">رفض</button>`:'<div class="m">بانتظار المشرف</div>')).join("");
+  $("#sug").querySelectorAll("[data-ok]").forEach(b=>b.onclick=async()=>{const x=sug.find(y=>y.id===b.dataset.ok),{id,...d}=x;try{await setDoc(doc(db,"lessons",id),d);await deleteDoc(doc(db,"suggestions",id))}catch(e){fail(e)}});
+  $("#sug").querySelectorAll("[data-no]").forEach(b=>b.onclick=()=>deleteDoc(doc(db,"suggestions",b.dataset.no)).catch(fail));
+}
+$("#sq").oninput=lists;
+$("#add").onclick=async()=>{
+  if(!cur||!$("#ti").value.trim()){$("#addM").textContent="اختر مادة واكتب عنواناً";return}
+  try{await addDoc(collection(db,admin?"lessons":"suggestions"),{subject:cur,type:$("#ty").value,title:$("#ti").value.trim(),text:$("#tx").value,date:$("#dt").value,by:me,t:Date.now()});
+  $("#ti").value=$("#tx").value="";$("#addM").textContent=admin?"تم":"أُرسل للمراجعة"}catch(e){fail(e)}
+};
+$("#sadd").onclick=()=>{
+  const n=$("#sn").value.trim();if(!n)return;
+  setDoc(doc(db,"config","subjects"),{list:[...subs,{id:"s"+Date.now(),name:n,coef:Number($("#sc").value)||1}]}).catch(fail);
+  $("#sn").value=$("#sc").value="";
+};
+$("#claim").onclick=()=>setDoc(doc(db,"config","admin"),{uid:me}).catch(fail);
+
+const nums=t=>String(t||"").split(/[,،\s]+/).filter(x=>x!=="").map(Number).filter(n=>isFinite(n));
+const avgOf=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null;
+function grades(){
+  $("#grl").innerHTML=subs.map(s=>{const a=avgOf(nums(G[s.id]));return `<div class="card"><b>${esc(s.name)}</b> <span class="m">معامل ${s.coef}</span>
+  <input data-g="${s.id}" value="${esc(G[s.id]||"")}" placeholder="الأعداد"><span class="m">${a==null?"":"المعدل: "+a.toFixed(2)}</span></div>`}).join("");
+  $("#grl").querySelectorAll("input").forEach(i=>i.onchange=()=>{G[i.dataset.g]=i.value;setDoc(doc(db,"users",me,"data","grades"),G).catch(fail);grades()});
+  let sw=0,sc=0;subs.forEach(s=>{const a=avgOf(nums(G[s.id]));if(a!=null){sw+=a*s.coef;sc+=s.coef}});
+  $("#avg").textContent=sc?"المعدل العام: "+(sw/sc).toFixed(2):"أدخل أعدادك لحساب المعدل العام";
+}
+$("#tgb").onclick=()=>{
+  const T=Number($("#tg").value),s=subs.find(x=>x.id===$("#ts").value);if(!s||!T)return;
+  let sw=0,sc=0;subs.forEach(x=>{if(x.id===s.id)return;const a=avgOf(nums(G[x.id]));if(a!=null){sw+=a*x.coef;sc+=x.coef}});
+  const need=(T*(sc+s.coef)-sw)/s.coef;
+  $("#tgr").textContent=`لبلوغ ${T} تحتاج معدلاً قدره ${need.toFixed(2)} في ${s.name}`+(need>20?" (غير ممكن على سلم 20)":"")+"، بافتراض ثبات بقية المواد المسجلة.";
+};
+
+function chatR(){
+  const el=$("#msgs");
+  el.innerHTML=chat.map(m=>`<div class="msg"><b>${m.by===me?"أنا":esc(m.name||"زميل")}</b> <span class="m">${new Date(m.t).toLocaleString("ar-TN",{hour:"2-digit",minute:"2-digit",day:"numeric",month:"numeric"})}</span><br>${esc(m.text)}${admin?` <button class="g" data-cd="${m.id}">حذف</button>`:""}</div>`).join("")||'<div class="m">لا رسائل بعد.</div>';
+  el.querySelectorAll("[data-cd]").forEach(b=>b.onclick=()=>deleteDoc(doc(db,"chat",b.dataset.cd)).catch(fail));
+  el.scrollTop=el.scrollHeight;
+}
+$("#cs").onclick=async()=>{const t=$("#ci").value.trim();if(!t)return;$("#ci").value="";try{await addDoc(collection(db,"chat"),{text:t.slice(0,500),by:me,name:user.displayName||"زميل",t:Date.now()})}catch(e){fail(e)}};
+$("#ci").onkeydown=e=>e.key==="Enter"&&$("#cs").click();
+
+function start(){
+  if(started)return;started=true;
+  onSnapshot(doc(db,"config","admin"),s=>{
+    admin=s.exists()&&s.data().uid===me;
+    $("#claim").hidden=s.exists();
+    $("#top").textContent=user.displayName+(admin?" (مشرف)":"");
+    $("#addT").textContent=admin?"إضافة محتوى":"اقتراح محتوى (يراجعه المشرف)";
+    $("#subAdmin").hidden=!admin;lists();chatR();
+  },fail);
+  onSnapshot(doc(db,"config","subjects"),s=>{subs=(s.data()||{}).list||[];chips();lists();grades()},fail);
+  onSnapshot(collection(db,"lessons"),s=>{les=s.docs.map(d=>({id:d.id,...d.data()}));lists()},fail);
+  onSnapshot(collection(db,"suggestions"),s=>{sug=s.docs.map(d=>({id:d.id,...d.data()}));lists()},fail);
+  onSnapshot(query(collection(db,"chat"),orderBy("t","desc"),limit(100)),s=>{chat=s.docs.map(d=>({id:d.id,...d.data()})).reverse();chatR()},fail);
+  onSnapshot(doc(db,"users",me,"data","grades"),s=>{G=s.data()||{};grades()},fail);
+}
+onAuthStateChanged(auth,u=>{
+  user=u;me=u&&u.uid;
+  $("#login").hidden=!!u;$("#app").hidden=!u;
+  if(u)start();
+});
+</script></body></html>
