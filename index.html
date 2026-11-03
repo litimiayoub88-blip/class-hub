@@ -249,3 +249,117 @@ $("lessonSubmit").onclick=async()=>{
 function renderNews(){
   const R=[...news].sort((a,b)=>b.t-a.t);
   $("newsList").innerHTML=R.length?R.map(n=>`<article class="item"><h3>${esc(n.title)}</h3><p>${esc(n.body)}</p>${/^https:\/\//.test(n.link||"")?`<a href="${esc(n.link)}" target="_blank" rel="noopener noreferrer">الرابط</
+// news
+function renderNews(){
+  const R=[...news].sort((a,b)=>b.t-a.t);
+  $("newsList").innerHTML=R.length?R.map(n=>`<article class="item"><h3>${esc(n.title)}</h3><p>${esc(n.body)}</p>${/^https:\/\//.test(n.link||"")?`<a href="${esc(n.link)}" target="_blank" rel="noopener noreferrer">الرابط</a>`:""}<div class="muted">${new Date(n.t).toLocaleDateString("ar-TN")}</div>${isAdmin?`<div class="actions"><button class="btn-danger btn-small" data-nd="${esc(n.id)}">حذف</button></div>`:""}</article>`).join(""):empty("لا توجد أخبار بعد.");
+  $("newsList").querySelectorAll("[data-nd]").forEach(b=>b.onclick=()=>confirm("تحذف الخبر؟")&&deleteDoc(doc(db,"news",b.dataset.nd)).catch(fail));
+}
+$("publishNews").onclick=async()=>{
+  const title=$("newsTitle").value.trim(),body=$("newsBody").value.trim(),link=$("newsLink").value.trim();
+  if(!title||!body)return toast("اكتب العنوان والتفاصيل");
+  try{await addDoc(collection(db,"news"),{title,body,link:/^https:\/\//.test(link)?link:"",t:Date.now(),by:me});$("newsTitle").value=$("newsBody").value=$("newsLink").value=""}catch(e){fail(e)}
+};
+
+// calendar
+function renderCalendar(){
+  const A=[...lessons.filter(x=>x.type!=="lesson"&&x.date).map(x=>({title:x.title,date:x.date,d:sName(x.subject)+" · "+TY[x.type]})),...events.map(e=>({id:e.id,title:e.title,date:e.date,d:e.details||""}))].filter(x=>x.date>=today()).sort((a,b)=>a.date.localeCompare(b.date));
+  $("calendarList").innerHTML=A.length?A.map(x=>`<div class="item row"><span class="pill">${esc(x.date)}</span><div class="grow"><b>${esc(x.title)}</b><div class="muted">${esc(x.d)}</div></div>${isAdmin&&x.id?`<button class="btn-danger btn-small" data-ed="${esc(x.id)}">حذف</button>`:""}</div>`).join(""):empty("لا مواعيد قادمة.");
+  $("calendarList").querySelectorAll("[data-ed]").forEach(b=>b.onclick=()=>deleteDoc(doc(db,"events",b.dataset.ed)).catch(fail));
+}
+$("addEvent").onclick=async()=>{
+  const title=$("eventTitle").value.trim(),date=$("eventDate").value;
+  if(!title||!date)return toast("اكتب العنوان والتاريخ");
+  try{await addDoc(collection(db,"events"),{title,date,details:$("eventDetails").value.trim(),t:Date.now()});$("eventTitle").value=$("eventDetails").value=""}catch(e){fail(e)}
+};
+
+// grades
+function renderGrades(){
+  $("gradesList").innerHTML=subjects.map(s=>{const a=avgOf(nums(grades[s.id]));return `<div class="card"><div class="row"><b class="grow">${esc(s.name)}</b><span class="pill">معامل ${esc(s.coef||1)}</span></div><input data-g="${esc(s.id)}" value="${esc(grades[s.id]||"")}" placeholder="مثال: 12, 14.5, 9"><div class="muted">${a==null?"لا أعداد مسجلة":"متوسط المادة: "+a.toFixed(2)}</div></div>`}).join("")||empty("المواد لم تُضف بعد.");
+  $("gradesList").querySelectorAll("[data-g]").forEach(i=>i.onchange=()=>{grades[i.dataset.g]=i.value;setDoc(doc(db,"users",me,"data","grades"),grades).catch(fail);renderGrades()});
+  let sw=0,sc=0;subjects.forEach(s=>{const a=avgOf(nums(grades[s.id]));if(a!=null){const c=Number(s.coef)||1;sw+=a*c;sc+=c}});
+  $("overallAverage").textContent=sc?`المعدل العام: ${(sw/sc).toFixed(2)} / 20`:"أدخل أعدادك لحساب المعدل.";
+}
+$("tgBtn").onclick=()=>{
+  const T=Number($("tgTarget").value),s=subjects.find(x=>x.id===$("tgSubject").value);if(!s||!T)return;
+  let sw=0,sc=0;subjects.forEach(x=>{if(x.id===s.id)return;const a=avgOf(nums(grades[x.id]));if(a!=null){const c=Number(x.coef)||1;sw+=a*c;sc+=c}});
+  const c=Number(s.coef)||1,need=(T*(sc+c)-sw)/c;
+  $("tgRes").textContent=`لبلوغ ${T} تحتاج معدلاً قدره ${need.toFixed(2)} في ${s.name}`+(need>20?" (غير ممكن على سلم 20)":"")+"، بافتراض ثبات بقية المواد المسجلة.";
+};
+
+// chat
+function renderChat(){
+  const el=$("chatMessages");
+  el.innerHTML=chat.map(m=>`<div class="bubble ${m.by===me?"mine":""}"><b>${m.by===me?"أنا":esc(m.name||"زميل")}</b> <span class="muted">${new Date(m.t).toLocaleString("ar-TN",{hour:"2-digit",minute:"2-digit",day:"numeric",month:"numeric"})}</span><br>${esc(m.text)}${isAdmin?` <button class="btn-ghost btn-small" data-cd="${esc(m.id)}">حذف</button>`:""}</div>`).join("")||'<div class="muted">لا رسائل بعد.</div>';
+  el.querySelectorAll("[data-cd]").forEach(b=>b.onclick=()=>deleteDoc(doc(db,"chat",b.dataset.cd)).catch(fail));
+  el.scrollTop=el.scrollHeight;
+}
+$("chatSend").onclick=async()=>{const t=$("chatInput").value.trim();if(!t)return;$("chatInput").value="";try{await addDoc(collection(db,"chat"),{text:t.slice(0,500),by:me,name:myName,t:Date.now()})}catch(e){fail(e)}};
+$("chatInput").onkeydown=e=>e.key==="Enter"&&$("chatSend").click();
+
+// members and admin
+function renderMembers(){
+  const aid=adminDoc&&adminDoc.uid;
+  $("memberList").innerHTML=(adminDoc?`<div class="card"><b>${esc(adminDoc.name)}</b> <span class="pill">المشرف</span></div>`:"")+mem.filter(m=>m.id!==aid).map(m=>`<div class="card row"><b class="grow">${esc(m.name)}</b><span class="pill">منخرط</span>${isAdmin?`<button class="btn-ghost btn-small" data-rm="${esc(m.id)}">إزالة</button>`:""}</div>`).join("");
+  $("memberList").querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>confirm("إزالة هذا العضو؟")&&deleteDoc(doc(db,"members",b.dataset.rm)).catch(fail));
+}
+function renderAdmin(){
+  if(!isAdmin)return;
+  const n=reqs.filter(r=>r.status!=="rejected").length+sugs.length;
+  $("adminNav").textContent=n?`🛡️ الإدارة (${n})`:"🛡️ الإدارة";
+  $("reqList").innerHTML=reqs.map(r=>`<div class="item"><b>${esc(r.name)}</b> <span class="muted">${esc(r.email)}</span><div class="actions"><button class="btn-small" data-ra="${esc(r.id)}">قبول</button>${r.status==="rejected"?'<span class="muted">مرفوض</span>':`<button class="btn-danger btn-small" data-rr="${esc(r.id)}">رفض</button>`}</div></div>`).join("")||empty("لا طلبات.");
+  $("reqList").querySelectorAll("[data-ra]").forEach(b=>b.onclick=async()=>{const r=reqs.find(x=>x.id===b.dataset.ra);try{await setDoc(doc(db,"members",r.id),{name:r.name,email:r.email,t:Date.now()});await deleteDoc(doc(db,"requests",r.id))}catch(e){fail(e)}});
+  $("reqList").querySelectorAll("[data-rr]").forEach(b=>b.onclick=()=>{const {id,...d}=reqs.find(x=>x.id===b.dataset.rr);setDoc(doc(db,"requests",id),{...d,status:"rejected"}).catch(fail)});
+  $("sugList").innerHTML=sugs.map(x=>`<div class="item"><div class="row"><span class="pill">${TY[x.type]||""}</span><b class="grow">${esc(x.title)}</b><span class="muted">${esc(sName(x.subject))} · ${esc(x.date||"")}</span></div><p>${esc(x.text)}</p><div class="actions"><button class="btn-small" data-sa="${esc(x.id)}">قبول</button><button class="btn-danger btn-small" data-sr="${esc(x.id)}">رفض</button></div></div>`).join("")||empty("لا اقتراحات.");
+  $("sugList").querySelectorAll("[data-sa]").forEach(b=>b.onclick=async()=>{const x=sugs.find(y=>y.id===b.dataset.sa),{id,...d}=x;try{await setDoc(doc(db,"lessons",id),d);await deleteDoc(doc(db,"suggestions",id))}catch(e){fail(e)}});
+  $("sugList").querySelectorAll("[data-sr]").forEach(b=>b.onclick=()=>deleteDoc(doc(db,"suggestions",b.dataset.sr)).catch(fail));
+  $("subjectAdminList").innerHTML=subjects.map(s=>`<div class="item row"><span class="grow">${esc(s.name)} — معامل ${esc(s.coef||1)}</span><button class="btn-danger btn-small" data-sd="${esc(s.id)}">حذف</button></div>`).join("");
+  $("subjectAdminList").querySelectorAll("[data-sd]").forEach(b=>b.onclick=()=>confirm("حذف المادة؟ لن تُحذف الدروس المرتبطة بها.")&&setDoc(doc(db,"config","subjects"),{list:subjects.filter(s=>s.id!==b.dataset.sd)}).catch(fail));
+}
+$("addSubject").onclick=()=>{
+  const name=$("newSubject").value.trim(),coef=Number($("newCoef").value);
+  if(!name||!isFinite(coef)||coef<=0||coef>10)return toast("اكتب اسم مادة ومعاملاً بين 0 و10");
+  if(subjects.some(s=>s.name.toLowerCase()===name.toLowerCase()))return toast("المادة موجودة بالفعل");
+  setDoc(doc(db,"config","subjects"),{list:[...subjects,{id:crypto.randomUUID(),name,coef}]}).catch(fail);
+  $("newSubject").value="";
+};
+
+// AI
+const addAi=(who,t)=>{const el=$("aiMessages");if(el.firstElementChild&&el.firstElementChild.classList.contains("muted"))el.innerHTML="";const d=document.createElement("div");d.className="bubble"+(who==="me"?" mine":"");d.textContent=t;el.appendChild(d);el.scrollTop=el.scrollHeight;return d};
+$("aiSend").onclick=async()=>{
+  const q=$("aiInput").value.trim();if(!q)return;
+  addAi("me",q);$("aiInput").value="";
+  if(!model){addAi("ai","المساعد الذكي لم يُفعَّل بعد.");return}
+  const b=addAi("ai","جارٍ التفكير…");
+  const data=lessons.map(x=>({المادة:sName(x.subject),النوع:TY[x.type],العنوان:x.title,التاريخ:x.date,النص:x.text}));
+  try{
+    const r=await model.generateContent(`أنت مساعد دراسة لتلاميذ قسم. أجب بالعربية البسيطة اعتماداً على المعطيات التالية فقط. إن لم تجد الجواب فيها فقل ذلك ولا تخمّن. إن أعطى السائل خيارات فاختر الأفضل مع سبب مختصر. تاريخ اليوم: ${today()}.\nالمعطيات: ${JSON.stringify(data)}\nالسؤال: ${q}`);
+    b.textContent=r.response.text();
+  }catch(e){b.textContent="تعذّر الحصول على جواب: "+(e.code||e.message)}
+};
+
+// data
+function renderAll(){renderSubjects();renderLessons();renderNews();renderCalendar();renderGrades();renderChat();renderMembers();renderAdmin()}
+const watch=(ref,fn)=>onSnapshot(ref,fn,fail);
+const docs=s=>s.docs.map(d=>({id:d.id,...d.data()}));
+function startData(){
+  if(started)return;started=true;
+  watch(doc(db,"config","subjects"),s=>{subjects=(s.data()||{}).list||[];renderAll()});
+  watch(collection(db,"lessons"),s=>{lessons=docs(s);renderLessons();renderCalendar()});
+  watch(collection(db,"suggestions"),s=>{sugs=docs(s);renderAdmin()});
+  watch(collection(db,"news"),s=>{news=docs(s);renderNews()});
+  watch(collection(db,"events"),s=>{events=docs(s);renderCalendar()});
+  watch(query(collection(db,"chat"),orderBy("t","desc"),limit(100)),s=>{chat=docs(s).reverse();renderChat()});
+  watch(doc(db,"users",me,"data","grades"),s=>{grades=s.data()||{};renderGrades()});
+  watch(collection(db,"members"),s=>{mem=docs(s);renderMembers()});
+  if(isAdmin)watch(collection(db,"requests"),s=>{reqs=docs(s);renderAdmin()});
+}
+onAuthStateChanged(auth,u=>{
+  user=u;me=u&&u.uid;
+  if(!u){view("loginView");return}
+  if(boot)return;boot=true;
+  watch(doc(db,"config","admin"),s=>{adminDoc=s.exists()?s.data():null;L.a=1;route()});
+  watch(doc(db,"members",me),s=>{memberDoc=s.exists()?s.data():null;L.m=1;route()});
+  watch(doc(db,"requests",me),s=>{reqDoc=s.exists()?s.data():null;L.r=1;route()});
+});
+</script></body></html>
