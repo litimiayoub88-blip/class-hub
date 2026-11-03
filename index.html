@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#123d35"><title>Class9b3</title>
+<style>
+:root{color-scheme:light;--bg:#f4f6f4;--surface:#fff;--surface2:#edf2ef;--fg:#17231f;--muted:#66756e;--line:#dce5df;--accent:#176b55;--accent2:#e1f2eb;--danger:#b93832;--shadow:0 10px 30px #173c2b10}
+[data-theme="dark"]{color-scheme:dark;--bg:#101916;--surface:#18231f;--surface2:#202e28;--fg:#edf5f0;--muted:#a6b5ad;--line:#304139;--accent:#63c6a0;--accent2:#203d32;--danger:#ff8179;--shadow:0 10px 30px #0005}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;padding-bottom:86px}
+button,input,select,textarea{font:inherit}button{border:0;border-radius:12px;padding:10px 15px;background:var(--accent);color:#fff;cursor:pointer;font-weight:650}
+.btn-ghost{background:transparent;color:var(--accent);border:1px solid var(--line)}.btn-danger{background:var(--danger);color:#fff}.btn-small{padding:6px 10px;font-size:13px}
+input,select,textarea{width:100%;background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:11px;padding:10px 12px;margin:4px 0;outline:none}textarea{resize:vertical}
+.wrap{width:min(1120px,100% - 28px);margin:auto}.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 0}.brand{display:flex;align-items:center;gap:10px;font-weight:850;font-size:20px}.logo{width:42px;height:42px;border-radius:14px;background:var(--accent);color:#fff;display:grid;place-items:center;font-weight:900}
+.muted{color:var(--muted);font-size:13px}.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.row>*{min-width:0}.grow{flex:1}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px;margin:12px 0;box-shadow:var(--shadow)}
+.hero{background:linear-gradient(125deg,var(--accent),#234b41);color:#fff;border-radius:22px;padding:22px;margin:12px 0}.hero p{opacity:.88;margin-bottom:0}
+h1{font-size:clamp(23px,4vw,34px);margin:4px 0}h2{font-size:20px;margin:18px 0 8px}h3{font-size:17px;margin:0 0 5px}
+.pill{display:inline-block;background:var(--accent2);color:var(--accent);border-radius:999px;padding:3px 10px;font-size:12px;font-weight:700}
+.hidden{display:none!important}.auth{max-width:460px;margin:8vh auto}.auth .card{padding:24px}
+.section{display:none}.section.active{display:block}
+.nav{position:fixed;bottom:0;left:0;right:0;z-index:10;display:flex;gap:4px;padding:8px 8px calc(8px + env(safe-area-inset-bottom));background:var(--surface);border-top:1px solid var(--line);overflow-x:auto}
+.nav button{background:transparent;color:var(--muted);white-space:nowrap;padding:9px 12px;font-size:13px}.nav button.active{background:var(--accent2);color:var(--accent)}
+.item{border-bottom:1px solid var(--line);padding:13px 0}.item:last-child{border:0}.item p{white-space:pre-wrap;margin:6px 0}.actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
+.empty{padding:22px;text-align:center;color:var(--muted)}.field{margin:8px 0}.field label{display:block;font-size:13px;font-weight:700}
+.modal-backdrop{position:fixed;inset:0;background:#0009;z-index:30;display:grid;place-items:center;padding:18px}
+.modal{width:min(520px,100%);background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:20px;max-height:85vh;overflow:auto}
+.chatbox{height:min(48vh,480px);overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px}
+.bubble{padding:9px 12px;border-radius:14px;background:var(--surface2);margin:8px 0;max-width:90%;white-space:pre-wrap}.bubble.mine{margin-right:auto;background:var(--accent2)}
+.toast{position:fixed;bottom:90px;left:12px;right:12px;background:var(--danger);color:#fff;padding:10px 14px;border-radius:12px;z-index:40}
+.footer-note{text-align:center;color:var(--muted);font-size:12px;padding:20px}
+@media(min-width:760px){body{padding-bottom:20px}.nav{position:sticky;top:0;bottom:auto;border:1px solid var(--line);border-radius:16px;margin:8px auto 18px;width:min(1120px,100% - 28px)}}
+</style></head><body>
+
+<div id="loginView" class="wrap auth hidden"><div class="card">
+<div class="brand"><div class="logo">9B3</div><div>Class9b3<div class="muted">منصّة القسم التعليمية</div></div></div>
+<h1 style="margin-top:24px">مرحبا بيك 👋</h1>
+<input id="em" type="email" placeholder="البريد الإلكتروني" autocomplete="email">
+<input id="pw" type="password" placeholder="كلمة السر (6 أحرف على الأقل)" autocomplete="current-password">
+<div class="row"><button id="si" class="grow">دخول</button><button id="su" class="btn-ghost grow">إنشاء حساب</button></div>
+<div class="row" style="margin-top:8px"><button id="fp" class="btn-ghost btn-small">نسيت كلمة السر</button><button id="gg" class="btn-ghost btn-small">الدخول بـ Google</button></div>
+<p id="loginError" class="muted"></p></div></div>
+
+<div id="gateView" class="wrap auth hidden"><div class="card"><h2 id="gt"></h2><p id="gm" class="muted"></p>
+<div id="gf"><input id="fn" placeholder="الاسم"><input id="ln" placeholder="اللقب"><button id="gb" style="width:100%"></button></div>
+<button id="gout" class="btn-ghost" style="width:100%;margin-top:8px">خروج</button></div></div>
+
+<div id="appView" class="hidden">
+<header class="wrap topbar">
+<div class="brand"><div class="logo">9B3</div><div>Class9b3<div class="muted" id="welcomeText">أهلا</div></div></div>
+<div class="row"><button class="btn-ghost btn-small" id="themeBtn">الوضع الداكن</button><button class="btn-ghost btn-small" id="out">خروج</button></div>
+</header>
+<main class="wrap">
+<div class="hero"><span class="pill" style="background:#ffffff25;color:#fff">القسم 9 أساسي 3</span><h1>تعلّم، تابع، وتقدّم.</h1><p>كل ما يخص دراستك في مكان واحد.</p></div>
+
+<section id="lessons" class="section active">
+<h2>📚 الدروس والواجبات</h2>
+<div class="card"><div class="row"><input id="lessonSearch" class="grow" placeholder="ابحث في الدروس..."><select id="subjectFilter" style="max-width:190px"></select></div></div>
+<div id="lessonList" class="card"></div>
+<div class="card"><h3 id="lessonFormTitle"></h3>
+<div class="field"><label>المادة</label><select id="lessonSubject"></select></div>
+<div class="field"><label>النوع</label><select id="lessonType"><option value="lesson">درس</option><option value="hw">واجب</option><option value="exam">فرض / امتحان</option></select></div>
+<div class="field"><label>العنوان</label><input id="lessonTitle" maxlength="120" placeholder="عنوان المحتوى"></div>
+<div class="field"><label>التاريخ</label><input id="lessonDate" type="date"></div>
+<div class="field"><label>التفاصيل</label><textarea id="lessonText" rows="4" maxlength="8000" placeholder="اكتب التفاصيل..."></textarea></div>
+<button id="lessonSubmit"></button> <span id="lessonStatus" class="muted"></span></div>
+</section>
+
+<section id="news" class="section">
+<h2>📰 أخبار القسم</h2>
+<div id="newsAdminForm" class="card hidden"><h3>نشر خبر جديد</h3>
+<input id="newsTitle" maxlength="140" placeholder="عنوان الخبر"><textarea id="newsBody" rows="4" maxlength="8000" placeholder="تفاصيل الخبر"></textarea>
+<input id="newsLink" type="url" placeholder="رابط اختياري يبدأ بـ https://"><button id="publishNews">نشر الخبر</button></div>
+<div id="newsList" class="card"></div>
+</section>
+
+<section id="ai" class="section">
+<h2>🤖 المساعد الذكي</h2><p class="muted">يجيب من الدروس المسجلة فقط. راجع إجاباته ولا تعتبره بديلاً عن أستاذك.</p>
+<div id="aiMessages" class="chatbox"><div class="muted">مثال: لخّص درس كذا، أو: متى فرض مادة كذا؟ أو أعطه خيارات ليختار الأفضل.</div></div>
+<div class="row" style="margin-top:8px"><input id="aiInput" class="grow" maxlength="2000" placeholder="اكتب سؤالك..."><button id="aiSend">إرسال</button></div>
+</section>
+
+<section id="grades" class="section">
+<h2>📊 أعدادي</h2><p class="muted">الأعداد خاصة بحسابك ولا يراها أحد غيرك. اكتبها مفصولة بفاصلة.</p>
+<div id="gradesList"></div>
+<div class="card"><h3 id="overallAverage"></h3></div>
+<div class="card"><h3>ماذا لو؟</h3><div class="row"><input id="tgTarget" type="number" class="grow" placeholder="المعدل المطلوب"><select id="tgSubject" style="max-width:190px"></select></div>
+<button id="tgBtn">احسب</button><p id="tgRes" class="muted"></p></div>
+</section>
+
+<section id="chat" class="section">
+<h2>💬 دردشة القسم</h2><div id="chatMessages" class="chatbox"></div>
+<div class="row" style="margin-top:8px"><input id="chatInput" class="grow" maxlength="500" placeholder="اكتب رسالة محترمة..."><button id="chatSend">إرسال</button></div>
+</section>
+
+<section id="calendar" class="section">
+<h2>📅 الرزنامة</h2>
+<div id="calendarAdminForm" class="card hidden"><h3>إضافة موعد</h3>
+<input id="eventTitle" maxlength="120" placeholder="عنوان الموعد"><input id="eventDate" type="date"><textarea id="eventDetails" rows="3" maxlength="2000" placeholder="تفاصيل اختيارية"></textarea><button id="addEvent">إضافة الموعد</button></div>
+<div id="calendarList" class="card"></div>
+</section>
+
+<section id="members" class="section">
+<h2>👥 الأعضاء</h2><div id="memberList"></div>
+</section>
+
+<section id="admin" class="section">
+<h2>🛡️ لوحة الإدارة</h2>
+<div class="card"><h3>طلبات الانضمام</h3><div id="reqList"></div></div>
+<div class="card"><h3>اقتراحات تنتظر المراجعة</h3><div id="sugList"></div></div>
+<div class="card"><h3>إدارة المواد</h3><div class="row"><input id="newSubject" class="grow" placeholder="اسم المادة"><input id="newCoef" type="number" min="0.1" max="10" step="0.1" value="1" style="max-width:100px"><button id="addSubject">إضافة</button></div><div id="subjectAdminList"></div></div>
+</section>
+</main>
+<nav class="nav" id="mainNav">
+<button data-page="lessons" class="active">📚 الدروس</button><button data-page="news">📰 الأخبار</button><button data-page="ai">🤖 اسأل</button><button data-page="grades">📊 المعدل</button><button data-page="chat">💬 الدردشة</button><button data-page="calendar">📅 الرزنامة</button><button data-page="members">👥 الأعضاء</button><button data-page="admin" id="adminNav" class="hidden">🛡️ الإدارة</button>
+</nav>
+<div class="wrap footer-note">Class9b3 • استعمل المنصّة باحترام ومسؤولية</div>
+</div>
+
+<div id="guideBackdrop" class="modal-backdrop hidden"><div class="modal">
+<div class="row"><h2 id="guideTitle" class="grow"></h2></div><div id="guideContent"></div>
+<button id="guideDone" style="width:100%;margin-top:12px">فهمت، ابدأ الاستعمال</button></div></div>
+<div id="toast" class="toast hidden"></div>
+
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+import {getAuth,GoogleAuthProvider,signInWithPopup,signOut,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,sendPasswordResetEmail} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+import {getFirestore,doc,getDoc,collection,onSnapshot,setDoc,addDoc,deleteDoc,query,orderBy,limit} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+import {initializeAppCheck,ReCaptchaEnterpriseProvider} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app-check.js";
+import {getAI,getGenerativeModel,GoogleAIBackend} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-ai.js";
+const app=initializeApp({apiKey:"AIzaSyBNs9AmOZ-206UmlOrbh-eqTKAO5e0-IE4",authDomain:"class9b3-9efa0.firebaseapp.com",projectId:"class9b3-9efa0",storageBucket:"class9b3-9efa0.firebasestorage.app",messagingSenderId:"644056561140",appId:"1:644056561140:web:002514ce43678b229c35a1"});
+const auth=getAuth(app),db=getFirestore(app);
+const SITEKEY="",MODEL="gemini-2.5-flash";
+let model=null;
+if(SITEKEY){initializeAppCheck(app,{provider:new ReCaptchaEnterpriseProvider(SITEKEY),isTokenAutoRefreshEnabled:true});model=getGenerativeModel(getAI(app,{backend:new GoogleAIBackend()}),{model:MODEL})}
+
+const $=id=>document.getElementById(id);
+const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const TY={lesson:"درس",hw:"واجب",exam:"فرض / امتحان"};
+const GUIDES={
+lessons:["الدروس والواجبات","اختار المادة أو استعمل البحث. التلميذ ينجم يقترح درساً أو واجباً، والاقتراح ما يظهرش للناس حتى يراجعه المشرف."],
+news:["الأخبار","هنا تلقى إعلانات القسم والمستجدات. المشرف وحده ينجم ينشرها أو يحذفها."],
+ai:["المساعد الذكي","اكتب سؤالك بوضوح. يجاوب من الدروس المسجلة فقط، وإذا ما لقاش الجواب يقولك."],
+grades:["الأعداد والمعدل","اكتب أعداد كل مادة مفصولة بفاصلة. الأعداد خاصة بحسابك وما يشوفها حتى واحد."],
+chat:["دردشة القسم","اكتب رسالة قصيرة ومحترمة. ما تنشرش معلوماتك الخاصة. المشرف ينجم يحذف الرسائل المخالفة."],
+calendar:["الرزنامة","تابع الفروض والواجبات والمواعيد المضافة للقسم."],
+members:["الأعضاء","قائمة أعضاء القسم، والمشرف في الأعلى."],
+admin:["لوحة الإدارة","للمشرف فقط: قبول طلبات الانضمام، مراجعة الاقتراحات، وإدارة المواد."]};
+let user,me,adminDoc=null,memberDoc=null,reqDoc=null,L={},isAdmin=false,myName="",boot=false,started=false,shown=false,guideDone=null;
+let subjects=[],lessons=[],sugs=[],news=[],events=[],chat=[],mem=[],reqs=[],grades={};
+
+let toastT;const toast=m=>{const t=$("toast");t.textContent=m;t.classList.remove("hidden");clearTimeout(toastT);toastT=setTimeout(()=>t.classList.add("hidden"),5000)};
+const fail=e=>{console.error(e);toast("خطأ: "+(e.code||e.message))};
+const view=w=>["loginView","gateView","appView"].forEach(x=>$(x).classList.toggle("hidden",x!==w));
+
+// theme
+function setTheme(t){document.documentElement.dataset.theme=t;$("themeBtn").textContent=t==="dark"?"الوضع الفاتح":"الوضع الداكن";try{localStorage.setItem("theme",t)}catch(e){}}
+let th="light";try{th=localStorage.getItem("theme")||"light"}catch(e){}
+setTheme(th);
+$("themeBtn").onclick=()=>setTheme(document.documentElement.dataset.theme==="dark"?"light":"dark");
+
+// auth
+const AE={"auth/invalid-credential":"البريد أو كلمة السر غير صحيحة","auth/invalid-email":"البريد غير صالح","auth/email-already-in-use":"هذا البريد مسجّل من قبل، اضغط دخول","auth/weak-password":"كلمة السر قصيرة (6 أحرف على الأقل)","auth/missing-password":"اكتب كلمة السر","auth/too-many-requests":"محاولات كثيرة، انتظر قليلاً","auth/operation-not-allowed":"طريقة الدخول هذه غير مفعّلة في Firebase"};
+const aerr=e=>$("loginError").textContent=AE[e.code]||e.code||e.message;
+$("si").onclick=()=>signInWithEmailAndPassword(auth,$("em").value.trim(),$("pw").value).catch(aerr);
+$("su").onclick=()=>createUserWithEmailAndPassword(auth,$("em").value.trim(),$("pw").value).catch(aerr);
+$("fp").onclick=()=>{const e=$("em").value.trim();if(!e){$("loginError").textContent="اكتب بريدك أولاً";return}sendPasswordResetEmail(auth,e).then(()=>$("loginError").textContent="أُرسل رابط إعادة التعيين إلى بريدك").catch(aerr)};
+$("gg").onclick=()=>signInWithPopup(auth,new GoogleAuthProvider()).catch(aerr);
+const logout=()=>signOut(auth).then(()=>location.reload());
+$("out").onclick=$("gout").onclick=logout;
+
+// navigation and guides
+function go(p){
+  document.querySelectorAll(".section").forEach(s=>s.classList.toggle("active",s.id===p));
+  document.querySelectorAll("#mainNav button").forEach(b=>b.classList.toggle("active",b.dataset.page===p));
+  showGuide(p);
+}
+document.querySelectorAll("#mainNav button").forEach(b=>b.onclick=()=>go(b.dataset.page));
+async function showGuide(p){
+  if(!user||!GUIDES[p])return;
+  try{
+    const ref=doc(db,"users",me,"guides",p);
+    if((await getDoc(ref)).exists())return;
+    $("guideTitle").textContent=GUIDES[p][0];$("guideContent").textContent=GUIDES[p][1];
+    $("guideBackdrop").classList.remove("hidden");
+    guideDone=()=>{$("guideBackdrop").classList.add("hidden");guideDone=null;setDoc(ref,{seen:true,t:Date.now()}).catch(()=>{})};
+  }catch(e){}
+}
+$("guideDone").onclick=()=>guideDone&&guideDone();
+
+// gate
+function route(){
+  if(!user){view("loginView");return}
+  if(!(L.a&&L.m&&L.r))return;
+  isAdmin=!!adminDoc&&adminDoc.uid===me;
+  if(isAdmin||memberDoc){
+    myName=isAdmin?adminDoc.name:memberDoc.name;
+    view("appView");
+    $("welcomeText").textContent="أهلا "+myName+(isAdmin?" (المشرف)":"");
+    ["adminNav","newsAdminForm","calendarAdminForm"].forEach(x=>$(x).classList.toggle("hidden",!isAdmin));
+    startData();renderAll();
+    if(!shown){shown=true;showGuide("lessons")}
+    return;
+  }
+  view("gateView");$("gf").classList.remove("hidden");
+  if(!adminDoc){$("gt").textContent="إعداد الصفحة";$("gm").textContent="أنت أول من يدخل. إن كنت مالك الصفحة فأدخل اسمك ولقبك واضغط الزر لتصبح المشرف.";$("gb").textContent="أنا المشرف"}
+  else if(reqDoc){$("gf").classList.add("hidden");const r=reqDoc.status==="rejected";$("gt").textContent=r?"رُفض طلبك":"طلبك قيد المراجعة";$("gm").textContent=r?"لم يقبل المشرف طلب انضمامك.":"سيفتح لك المحتوى عندما يقبل المشرف طلبك. أعد فتح الصفحة لاحقاً."}
+  else{$("gt").textContent="طلب الانضمام";$("gm").textContent="أدخل اسمك ولقبك الحقيقيين، ثم أرسل الطلب ليراجعه المشرف.";$("gb").textContent="إرسال الطلب"}
+}
+$("gb").onclick=async()=>{
+  const fn=$("fn").value.trim(),ln=$("ln").value.trim();
+  if(fn.length<2||ln.length<2){$("gm").textContent="اكتب الاسم واللقب (حرفان على الأقل لكل منهما)";return}
+  const name=(fn+" "+ln).slice(0,60);
+  try{if(!adminDoc)await setDoc(doc(db,"config","admin"),{uid:me,name});else await setDoc(doc(db,"requests",me),{name,email:user.email||"",status:"pending",t:Date.now()})}catch(e){fail(e)}
+};
+
+// helpers
+const sName=id=>(subjects.find(s=>s.id===id)||{}).name||"مادة غير معروفة";
+const today=()=>new Date().toISOString().slice(0,10);
+const nums=t=>String(t||"").split(/[,،\s]+/).filter(x=>x!=="").map(Number).filter(n=>isFinite(n)&&n>=0&&n<=20);
+const avgOf=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null;
+const empty=t=>`<div class="empty">${t}</div>`;
+
+// lessons
+function renderSubjects(){
+  const o=subjects.map(s=>`<option value="${esc(s.id)}">${esc(s.name)}</option>`).join("");
+  $("lessonSubject").innerHTML=o||'<option value="">لا توجد مواد</option>';
+  const f=$("subjectFilter").value;
+  $("subjectFilter").innerHTML='<option value="">كل المواد</option>'+o;$("subjectFilter").value=f;
+  $("tgSubject").innerHTML=o;
+}
+function renderLessons(){
+  const q=$("lessonSearch").value.trim().toLowerCase(),f=$("subjectFilter").value;
+  const R=lessons.filter(x=>(!f||x.subject===f)&&(!q||(x.title+" "+x.text).toLowerCase().includes(q))).sort((a,b)=>(a.date||"9").localeCompare(b.date||"9"));
+  $("lessonList").innerHTML=R.length?R.map(x=>`<article class="item"><div class="row"><span class="pill">${TY[x.type]||"محتوى"}</span><b class="grow">${esc(x.title)}</b><span class="muted">${esc(sName(x.subject))} · ${esc(x.date||"")}</span></div><p>${esc(x.text)}</p>${isAdmin?`<div class="actions"><button class="btn-danger btn-small" data-ld="${esc(x.id)}">حذف</button></div>`:""}</article>`).join(""):empty("ما فماش محتوى يطابق البحث.");
+  $("lessonList").querySelectorAll("[data-ld]").forEach(b=>b.onclick=()=>confirm("تحذف المحتوى؟")&&deleteDoc(doc(db,"lessons",b.dataset.ld)).catch(fail));
+  $("lessonFormTitle").textContent=isAdmin?"إضافة درس مباشرة":"اقتراح درس أو واجب";
+  $("lessonSubmit").textContent=isAdmin?"نشر المحتوى":"إرسال للمراجعة";
+}
+$("lessonSearch").oninput=renderLessons;$("subjectFilter").onchange=renderLessons;
+$("lessonSubmit").onclick=async()=>{
+  const subject=$("lessonSubject").value,title=$("lessonTitle").value.trim(),text=$("lessonText").value.trim();
+  if(!subject||!title||!text)return toast("اختر المادة واكتب العنوان والتفاصيل");
+  try{
+    await addDoc(collection(db,isAdmin?"lessons":"suggestions"),{subject,type:$("lessonType").value,title,text,date:$("lessonDate").value,by:me,t:Date.now()});
+    $("lessonTitle").value=$("lessonText").value="";$("lessonStatus").textContent=isAdmin?"تم النشر":"أُرسل للمراجعة";
+  }catch(e){fail(e)}
+};
+
+// news
+function renderNews(){
+  const R=[...news].sort((a,b)=>b.t-a.t);
+  $("newsList").innerHTML=R.length?R.map(n=>`<article class="item"><h3>${esc(n.title)}</h3><p>${esc(n.body)}</p>${/^https:\/\//.test(n.link||"")?`<a href="${esc(n.link)}" target="_blank" rel="noopener noreferrer">الرابط</
